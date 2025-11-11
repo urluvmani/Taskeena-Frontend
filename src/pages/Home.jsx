@@ -377,7 +377,7 @@ const Home = () => {
 
         {/* FOOTER CTA */}
         {!auth?.token && (
-          <section className="bg-gradient-to-r from-emerald-600 to-rose-600 text-white text-center py-16 mt-16 rounded-t-[3rem]">
+          <section className="bg-gradient-to-r from-emerald-600 to-rose-600 text-white text-center py-16 mt-16 mx-5 rounded-[3rem]">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Join Taskeena Wellness Circle 🌿
             </h2>
