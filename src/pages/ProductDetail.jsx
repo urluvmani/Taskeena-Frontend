@@ -320,7 +320,7 @@ const ProductDetail = () => {
               No related products found.
             </p>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-8">
               {relatedProducts.map((p) => (
                 <div
                   key={p._id}

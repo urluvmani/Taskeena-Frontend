@@ -134,14 +134,14 @@ const Home = () => {
 
       <div className="min-h-screen bg-gradient-to-br from-rose-50 py-4 via-white to-emerald-50">
         {/* HERO SECTION */}
-        <section className="relative w-[85%] mx-auto h-[50vh] flex items-center justify-center overflow-hidden rounded-2xl shadow-md">
+        <section className="relative  w-[85%] mx-auto md:h-[50vh] h-[60vh] flex items-center justify-center overflow-hidden rounded-2xl shadow-md">
           <img
             src="banner.webp"
             loading="lazy"
             alt="Beauty banner"
             className="absolute inset-0 w-full h-full rounded-2xl object-cover brightness-75"
           />
-          <div className="relative text-center px-6 md:px-12 text-white z-10">
+          <div className="relative text-center h-[400px] px-6 md:px-12 text-white z-10">
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -157,7 +157,7 @@ const Home = () => {
             <button
               onClick={() =>
                 window.scrollBy({
-                  top: window.innerHeight * 0.6,
+                  top: window.innerHeight * 1.3,
                   behavior: "smooth",
                 })
               }

@@ -4,10 +4,12 @@ import { useAuth } from "../../components/context/authContext";
 import SEO from "../../components/More/SEO";
 import { Package, ShoppingBag } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast"; // ✅ include Toaster
+import { useNavigate } from "react-router-dom";
 
 const MyOrders = () => {
   const { auth } = useAuth();
   const [orders, setOrders] = useState([]);
+const navigate =  useNavigate()
 
   // ✅ Fetch orders from API
   const getOrders = async () => {
@@ -54,6 +56,7 @@ const MyOrders = () => {
 
   useEffect(() => {
     if (auth?.token) getOrders();
+    else navigate('/login')
   }, [auth?.token]);
 
   return (

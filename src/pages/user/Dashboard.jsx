@@ -1,11 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import UserMenu from "../../components/More/userMenu";
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useNavigate } from "react-router-dom";
 import SEO from "../../components/More/SEO";
 import { Menu, X } from "lucide-react"; // ✅ for open/close toggle
+import { useAuth } from "../../components/context/authContext";
 
 const Dashboard = () => {
+  const {auth} = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false);
+ const navigate =  useNavigate()
+
+ useEffect(() => {
+  if (!auth?.token) {
+    navigate('/login')
+  }
+ }, [auth?.token])
+ 
 
   // ✅ Close sidebar when clicking outside
   const handleBackdropClick = () => {

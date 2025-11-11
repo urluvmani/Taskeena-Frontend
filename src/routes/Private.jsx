@@ -1,18 +1,18 @@
+// routes/Private.jsx
 import React from "react";
+import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../components/context/authContext";
-import { Outlet, Navigate } from "react-router-dom";
 
 const PrivateRoute = () => {
   const { auth } = useAuth();
-  console.log("PrivateRoute auth:", auth);
 
+  // ✅ if not logged in → redirect to /login
+  if (!auth?.token) {
+    return <Navigate to="/login" replace />;
+  }
 
-    return auth?.token ? <Outlet /> : <>
-    <div className="w-full h-screen flex justify-center text-3xl font-bold items-center text-center">
-       { Navigate("/login") }
-    </div>
-    </>;
-
+  // ✅ if logged in → allow access to child route
+  return <Outlet />;
 };
 
 export default PrivateRoute;
