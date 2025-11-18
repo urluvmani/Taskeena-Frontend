@@ -27,7 +27,7 @@ const Register = () => {
     );
     if (res) {
       toast.success("🎉 Registered Successfully! Welcome aboard 🌼");
-      Navigate("/");
+      Navigate("/login");
     }
   };
 

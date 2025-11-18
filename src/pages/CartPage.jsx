@@ -3,9 +3,8 @@ import { useCart } from "../components/context/Cart.jsx";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../components/context/authContext.jsx";
 import Swal from "sweetalert2";
-import SEO from "../components/More/SEO"; // ✅ SEO added
-import toast, { Toaster } from "react-hot-toast"; // ✅ include Toaster
-
+import SEO from "../components/More/SEO";
+import toast, { Toaster } from "react-hot-toast";
 
 const CartPage = () => {
   const { auth } = useAuth();
@@ -23,26 +22,52 @@ const CartPage = () => {
     return Number(p);
   };
 
+  // 🆕 New Helper to calculate discounted price (This solves your issue)
+  const getDiscountedPrice = (item) => {
+    const rawPrice = parsePrice(item.price);
+    const discountPercent = Number(item.discountPercent) || 0;
+
+    if (discountPercent > 0) {
+      // Calculate discounted price
+      return rawPrice - (rawPrice * discountPercent) / 100;
+    }
+    return rawPrice;
+  };
+
+  // ✅ UPDATED: Calculate total price using the discounted price
   const totalPrice = cart.reduce(
-    (sum, item) => sum + parsePrice(item.price) * (item.quantity || 1),
+    (sum, item) => sum + getDiscountedPrice(item) * (item.quantity || 1),
     0
   );
 
+  // Helper for displaying total price with currency formatting
+  const formattedTotalPrice = totalPrice.toLocaleString("en-PK", {
+    style: "currency",
+    currency: "PKR",
+    maximumFractionDigits: 0,
+  });
+
+  // ✅ Original functionality restored
   const removeFromCart = (id) => {
     const updatedCart = cart.filter((item) => item._id !== id);
     setCart(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart)); // Make sure to update localStorage too!
   };
 
+  // ✅ Original functionality restored
   const handleCheckout = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/order/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: auth?.token,
-        },
-        body: JSON.stringify({ cart, totalPrice }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/v1/order/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: auth?.token,
+          },
+          body: JSON.stringify({ cart, totalPrice }),
+        }
+      );
 
       const html = await res.text();
 
@@ -51,7 +76,7 @@ const CartPage = () => {
         localStorage.removeItem("cart");
 
         Swal.fire({
-          title: "Checkout Successful!",
+          title: "Order Successful!",
           html: html,
           icon: "success",
           timer: 10000,
@@ -59,9 +84,11 @@ const CartPage = () => {
         });
       } else {
         console.error("Server error:", html);
+        toast.error("Checkout failed. Please try again.");
       }
     } catch (err) {
       console.error("Checkout Error:", err);
+      toast.error("An error occurred during checkout.");
     }
   };
 
@@ -103,7 +130,11 @@ const CartPage = () => {
             <>
               <div className="space-y-6">
                 {cart.map((item) => {
-                  const price = parsePrice(item.price);
+                  // Calculations for display
+                  const originalPrice = parsePrice(item.price);
+                  const discountedPrice = getDiscountedPrice(item); // Use the new function
+                  const itemTotal = discountedPrice * (item.quantity || 1);
+
                   return (
                     <div
                       key={item._id}
@@ -111,7 +142,9 @@ const CartPage = () => {
                     >
                       <div className="flex items-center gap-4 w-full sm:w-auto">
                         <img
-                          src={`${import.meta.env.VITE_API_URL}/api/v1/product/product-photo/${item._id}`}
+                          src={`${
+                            import.meta.env.VITE_API_URL
+                          }/api/v1/product/product-photo/${item._id}`}
                           alt={`${item.name} – Taskeena product`}
                           loading="lazy"
                           className="w-24 h-24 object-cover rounded-lg border shadow-sm hover:scale-105 transition-transform"
@@ -126,19 +159,29 @@ const CartPage = () => {
                           <p className="text-sm text-gray-600">
                             Quantity: {item.quantity || 1}
                           </p>
-                          <p className="mt-1 font-semibold text-rose-500">
-                            PKR{" "}
-                            {(
-                              parsePrice(item.price) * (item.quantity || 1)
-                            ).toLocaleString()}
+
+                          {/* ✅ Discounted Price Display */}
+                          {item.discountPercent > 0 && (
+                            <div className="flex items-end gap-2">
+                              <span className="text-xs text-gray-400 line-through">
+                                PKR {originalPrice.toLocaleString()}
+                              </span>
+                              <span className="text-sm font-medium text-rose-500">
+                                ({item.discountPercent}% OFF)
+                              </span>
+                            </div>
+                          )}
+                          <p className="mt-1 font-semibold text-rose-500 md:text-lg">
+                            Total: PKR {itemTotal.toLocaleString()}
                           </p>
                         </div>
                       </div>
 
                       <button
-                        onClick={() => {removeFromCart(item._id)
-                          toast.success("Product removed from cart");}
-                        }
+                        onClick={() => {
+                          removeFromCart(item._id);
+                          toast.success("Product removed from cart");
+                        }}
                         className="px-4 py-2 text-sm bg-rose-100 text-rose-600 rounded-lg hover:bg-rose-200 transition"
                       >
                         Remove
@@ -148,7 +191,7 @@ const CartPage = () => {
                 })}
               </div>
 
-              {/* ✅ Address Section (New Professional Design) */}
+              {/* ✅ Address Section (Functionality preserved) */}
               <div className="mt-10 bg-gradient-to-r from-emerald-50 to-rose-50 border border-emerald-200 rounded-xl p-5 shadow-inner">
                 <h2 className="text-lg font-bold text-emerald-700 mb-2">
                   Shipping Address
@@ -193,12 +236,12 @@ const CartPage = () => {
                 )}
               </div>
 
-              {/* ✅ Checkout Summary Section */}
+              {/* ✅ Checkout Summary Section (Total updated to show discounted price) */}
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-between border-t pt-6">
                 <div className="text-xl font-semibold text-gray-700">
                   Total:{" "}
                   <span className="text-rose-500">
-                    PKR {totalPrice.toLocaleString()}
+                    {formattedTotalPrice} {/* Using formattedTotalPrice */}
                   </span>
                 </div>
 
@@ -213,9 +256,8 @@ const CartPage = () => {
                 </div>
 
                 <button
-                  onClick={()=>{
-                    
-                    handleCheckout()
+                  onClick={() => {
+                    handleCheckout();
                     toast.success("Proceeding Order ");
                   }}
                   className="mt-4 sm:mt-0 px-8 py-3 bg-gradient-to-r from-emerald-500 to-rose-500 text-white font-semibold rounded-full shadow hover:opacity-90 transition"
