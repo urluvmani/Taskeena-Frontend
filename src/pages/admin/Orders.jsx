@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useAuth } from "../../components/context/authContext";
+import PrintableInvoice from "./PrintableInvoice";
 import toast from "react-hot-toast";
 
 const Orders = () => {
@@ -8,6 +9,8 @@ const Orders = () => {
   const [allOrders, setAllOrders] = useState([]);
   const [totalOrder, setTotalOrder] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
+  const invoiceRef = useRef();
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   // ✅ Fetch all orders
   const GetAllOrders = async () => {
@@ -22,6 +25,34 @@ const Orders = () => {
       toast.error("Error loading orders");
     }
   };
+
+useEffect(() => {
+  if (selectedOrder) {
+    setTimeout(() => {
+      handlePrint();
+    }, 300);
+  }
+}, [selectedOrder]);
+
+  const handlePrint = () => {
+  if (!invoiceRef.current) return;
+
+  const printContents = invoiceRef.current.innerHTML;
+  const printWindow = window.open("", "", "width=800,height=600");
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Invoice</title>
+      </head>
+      <body>${printContents}</body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+  printWindow.close();
+};
+
 
   // ✅ Delete order
   const handleDeleteOrder = async (orderId) => {
@@ -199,6 +230,13 @@ const Orders = () => {
                     >
                       Delete
                     </button>
+                    <button
+  onClick={() => setSelectedOrder(order)}
+  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md text-sm"
+>
+  Print Invoice
+</button>
+
 
                     {/* Timestamp and amount */}
                     <div className="text-right">
@@ -284,6 +322,11 @@ const Orders = () => {
           )}
         </div>
       </div>
+      {/* Hidden printable invoice */}
+<div style={{ display: "none" }}>
+  <PrintableInvoice order={selectedOrder} ref={invoiceRef} />
+</div>
+
     </div>
   );
 };
