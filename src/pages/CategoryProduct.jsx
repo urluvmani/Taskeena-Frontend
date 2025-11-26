@@ -4,6 +4,7 @@ import axios from "axios";
 import SEO from "../components/More/SEO";
 import { useCart } from "../components/context/Cart";
 import { useAuth } from "../components/context/authContext";
+import { Link } from "react-router-dom";
 import toast,{Toaster} from "react-hot-toast";
 
 const CategoryProduct = () => {
@@ -112,6 +113,7 @@ const CategoryProduct = () => {
           {!loading && products.length === 0 && (
             <div className="col-span-full text-center text-slate-500 py-12 text-lg">
               No products found in this category.
+              <Link  to="/"><p className="text-xl p-2 bg-pink-400 text-white font-bold rounded-md shadow-2xl">Go to Home Page </p></Link>
             </div>
           )}
 
